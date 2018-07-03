@@ -52,6 +52,7 @@ public:
 
 	void                         DiscardLevelChanges();
 	CCryEditDoc*                 LoadLevel(const char* lpszFileName);
+	CCryEditDoc*                 LoadLevelCE2(const char* lpszFileName);
 
 	// don't use these suspending functions - they are used to hack freezing msgboxes during a crash, it will be removed
 	void SuspendUpdate()           { m_suspendUpdate = true; }

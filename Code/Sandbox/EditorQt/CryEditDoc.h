@@ -20,6 +20,8 @@ public:
 
 	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
 
+	virtual BOOL OnOpenDocumentCE2(LPCTSTR lpszPathName);
+
 	//TODO: this modified flag is only the level, not the entire data, should be moved to assets-based modified flags instead
 	void         SetModifiedFlag(bool bModified);
 
@@ -38,10 +40,13 @@ public:
 	};
 	BOOL               BeforeOpenDocument(LPCTSTR lpszPathName, TOpenDocContext& context);
 	BOOL               DoOpenDocument(LPCTSTR lpszPathName, TOpenDocContext& context);
+	BOOL               DoOpenDocumentCE2(LPCTSTR lpszPathName, TOpenDocContext& context);
+
 	virtual BOOL       LoadXmlArchiveArray(TDocMultiArchive& arrXmlAr, const string& relativeLevelName, const string& levelPath);
 	virtual void       ReleaseXmlArchiveArray(TDocMultiArchive& arrXmlAr);
 
 	virtual void       Load(TDocMultiArchive& arrXmlAr, const string& szFilename);
+	virtual void       LoadCE2(TDocMultiArchive& arrXmlAr, const string& szFilename);
 	virtual void       StartStreamingLoad() {}
 	virtual void       SyncCurrentMissionContent(bool bRetrieve);
 
@@ -55,6 +60,7 @@ public:
 	void               Save(TDocMultiArchive& arrXmlAr);
 	bool               SaveLevel(const string& filename);
 	bool               LoadLevel(TDocMultiArchive& arrXmlAr, const string& filename);
+	bool               LoadLevelCE2(TDocMultiArchive& arrXmlAr, const string& filename);
 	//! Get the path of the last level that was loaded last (relative to project root)
 	QString            GetLastLoadedLevelName();
 	//! Set the relative path of the last level that was loaded last (relative to project root)

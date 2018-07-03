@@ -714,18 +714,21 @@ bool CLevelEditor::OnOpenCE2()
 	{
 		return true;
 	}
-	COpenLevelDialog levelOpenDialog;
-	QString lastLoadedLevelName(GetIEditorImpl()->GetDocument()->GetLastLoadedLevelName());
-	if (!lastLoadedLevelName.isEmpty())
-	{
-		levelOpenDialog.SelectLevelFile(lastLoadedLevelName);
-	}
-	if (levelOpenDialog.exec() == QDialog::Accepted)
-	{
-		auto filename = levelOpenDialog.GetAcceptedLevelFile().toStdString();//will be relative to working directory/project root
-		CCryEditApp::GetInstance()->DiscardLevelChanges();
-		CCryEditApp::GetInstance()->LoadLevel(filename.c_str());
-	}
+	//COpenLevelDialog levelOpenDialog;
+	//QString lastLoadedLevelName(GetIEditorImpl()->GetDocument()->GetLastLoadedLevelName());
+	//if (!lastLoadedLevelName.isEmpty())
+	//{
+	//	levelOpenDialog.SelectLevelFile(lastLoadedLevelName);
+	//}
+	//if (levelOpenDialog.exec() == QDialog::Accepted)
+	//{
+	//	auto filename = levelOpenDialog.GetAcceptedLevelFile().toStdString();//will be relative to working directory/project root
+	//	CCryEditApp::GetInstance()->DiscardLevelChanges();
+	//	CCryEditApp::GetInstance()->LoadLevelCE2(filename.c_str());
+	//}
+
+	CCryEditApp::GetInstance()->LoadLevelCE2("Converter/CE2/Game/Levels_HD/acro_hd_challenge/acro_hd_challenge/level.editor_xml");
+
 	return true;
 }
 

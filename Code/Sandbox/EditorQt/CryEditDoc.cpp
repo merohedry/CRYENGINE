@@ -475,6 +475,92 @@ void CCryEditDoc::Load(TDocMultiArchive& arrXmlAr, const string& filename)
 	GetIEditorImpl()->Notify(eNotify_OnEndSceneOpen);
 }
 
+void CCryEditDoc::LoadCE2(TDocMultiArchive& arrXmlAr, const string& filename)
+{
+	using namespace Private_CryEditDoc;
+	CScopedVariableSetter<bool> loadingGuard(m_bLevelBeingLoaded, true);
+
+	// Register a unique load event
+	LOADING_TIME_PROFILE_SECTION(gEnv->pSystem);
+	m_pTmpXmlArchHack = arrXmlAr[DMAS_GENERAL];
+	CAutoDocNotReady autoDocNotReady;
+
+	HEAP_CHECK
+
+		CryLog("Loading from %s...", (const char*)filename);
+
+	SetGlobalLevelName(filename);
+
+	DisablePhysicsAndAISimulation();
+
+	GetIEditorImpl()->Notify(eNotify_OnBeginSceneOpen);
+	GetIEditorImpl()->GetMovieSystem()->RemoveAllSequences();
+
+	int t0 = GetTickCount();
+
+#ifdef PROFILE_LOADING_WITH_VTUNE
+	VTResume();
+#endif
+
+	CallAudioSystemOnLoad(filename);
+
+	HEAP_CHECK
+
+		string currentMissionName = GetCurrentMissionName(arrXmlAr);
+
+	HEAP_CHECK
+
+		LoadTerrain(arrXmlAr);
+
+	LoadGameEngineLevel(filename, currentMissionName);
+
+	(*arrXmlAr[DMAS_GENERAL]).root->getAttr("WaterColor", m_waterColor);
+
+	LoadMaterials(arrXmlAr);
+
+	LoadParticles(arrXmlAr);
+
+	LoadLensFlares(arrXmlAr);
+
+	LoadGameTokens(arrXmlAr);
+
+	SerializeViewSettings((*arrXmlAr[DMAS_GENERAL]));
+
+	LoadVegetation(arrXmlAr);
+
+	UpdateSurfaceTypes();
+
+	SerializeFogSettings((*arrXmlAr[DMAS_GENERAL]));
+
+	LoadEntityPrototypeDatabase(arrXmlAr);
+
+	LoadPrefabDatabase(arrXmlAr);
+
+	ActivateMission(currentMissionName);
+
+	ForceSkyUpdate();
+
+	LoadShaderCache(arrXmlAr);
+
+	CreateMovieSystemSequenceObjects();
+
+	CreateLevelIfNeeded();
+
+	CSurfaceTypeValidator().Validate();
+
+#ifdef PROFILE_LOADING_WITH_VTUNE
+	VTPause();
+#endif
+
+	LogLoadTime(GetTickCount() - t0);
+	m_pTmpXmlArchHack = 0;
+
+	GetIEditorImpl()->Notify(eNotify_OnEndSceneOpen);
+}
+
+
+
+
 void CCryEditDoc::LoadShaderCache(TDocMultiArchive& arrXmlAr)
 {
 	LOADING_TIME_PROFILE_SECTION_NAMED("Load Level Shader Cache");
@@ -785,6 +871,17 @@ BOOL CCryEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	return DoOpenDocument(lpszPathName, context);
 }
 
+BOOL CCryEditDoc::OnOpenDocumentCE2(LPCTSTR lpszPathName)
+{
+	TOpenDocContext context;
+	if (!BeforeOpenDocument(lpszPathName, context))
+		return FALSE;
+	return DoOpenDocumentCE2(lpszPathName, context);
+}
+
+
+
+
 BOOL CCryEditDoc::BeforeOpenDocument(LPCTSTR lpszPathName, TOpenDocContext& context)
 {
 	CTimeValue loading_start_time = gEnv->pTimer->GetAsyncTime();
@@ -851,6 +948,58 @@ BOOL CCryEditDoc::DoOpenDocument(LPCTSTR lpszPathName, TOpenDocContext& context)
 
 	return TRUE;
 }
+
+BOOL CCryEditDoc::DoOpenDocumentCE2(LPCTSTR lpszPathName, TOpenDocContext& context)
+{
+	LOADING_TIME_PROFILE_AUTO_SESSION("sandbox_level_load");
+	LOADING_TIME_PROFILE_SECTION;
+
+	CTimeValue& loading_start_time = context.loading_start_time;
+	string& relativeLevelName = context.relativeLevelName;
+
+	// write the full filename and path to the log
+	m_bLoadFailed = false;
+
+	ICryPak* pIPak = GetIEditorImpl()->GetSystem()->GetIPak();
+	string levelPath = PathUtil::GetPathWithoutFilename(relativeLevelName);
+
+	TDocMultiArchive arrXmlAr = {};
+	if (!LoadXmlArchiveArray(arrXmlAr, relativeLevelName, levelPath))
+		return FALSE;
+
+	if (gEnv->pGameFramework)
+	{
+		string level = relativeLevelName;
+		gEnv->pGameFramework->SetEditorLevel(PathUtil::GetFileName(level).c_str(), PathUtil::GetPathWithoutFilename(level).c_str());
+	}
+
+	LoadLevelCE2(arrXmlAr, relativeLevelName);
+	ReleaseXmlArchiveArray(arrXmlAr);
+
+	if (m_bLoadFailed)
+		return FALSE;
+
+	StartStreamingLoad();
+
+	CTimeValue loading_end_time = gEnv->pTimer->GetAsyncTime();
+
+	CryLog("-----------------------------------------------------------");
+	CryLog("Successfully opened document %s", (const char*)levelPath);
+	CryLog("Level loading time: %.2f seconds", (loading_end_time - loading_start_time).GetSeconds());
+	CryLog("-----------------------------------------------------------");
+
+	// It assumes loaded levels have already been exported. Can be a big fat lie, though.
+	// The right way would require us to save to the level folder the export status of the
+	// level.
+	SetLevelExported(true);
+
+	return TRUE;
+}
+
+
+
+
+
 
 BOOL CCryEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 {
@@ -1062,6 +1211,47 @@ bool CCryEditDoc::LoadLevel(TDocMultiArchive& arrXmlAr, const string& filename)
 
 	return true;
 }
+
+bool CCryEditDoc::LoadLevelCE2(TDocMultiArchive& arrXmlAr, const string& filename)
+{
+	LOADING_TIME_PROFILE_SECTION;
+	GetISystem()->SetSystemGlobalState(ESYSTEM_GLOBAL_STATE_LEVEL_LOAD_START_PREPARE);
+
+	ICryPak* pIPak = GetIEditorImpl()->GetSystem()->GetIPak();
+
+	string levelFolder = PathUtil::GetPathWithoutFilename(filename);
+
+	string levelPath = levelFolder;
+	string pszRelativePath = PathUtil::AbsolutePathToGamePath(levelPath.GetString());
+	if (pszRelativePath[0] != '.') // if the level file is in the root path of mastercd.
+		levelPath = PathUtil::GamePathToCryPakPath(pszRelativePath.GetString());
+
+	GetIEditorImpl()->GetGameEngine()->SetLevelPath(levelPath);
+	OnStartLevelResourceList();
+
+	// Load next level resource list.
+	pIPak->GetResourceList(ICryPak::RFOM_NextLevel)->Load(PathUtil::Make(levelFolder, "resourcelist.txt"));
+	GetIEditorImpl()->Notify(eNotify_OnBeginLoad);
+	DeleteContents();
+	SetModifiedFlag(TRUE);  // dirty during de-serialize
+	LoadCE2(arrXmlAr, filename);
+
+	GetISystem()->GetISystemEventDispatcher()->OnSystemEvent(ESYSTEM_EVENT_LEVEL_LOAD_END, 0, 0);
+	// We don't need next level resource list anymore.
+	pIPak->GetResourceList(ICryPak::RFOM_NextLevel)->Clear();
+	SetModifiedFlag(FALSE); // start off with unmodified
+	SetDocumentReady(true);
+	GetIEditorImpl()->Notify(eNotify_OnEndLoad);
+
+	GetISystem()->SetSystemGlobalState(ESYSTEM_GLOBAL_STATE_RUNNING);
+
+	return true;
+}
+
+
+
+
+
 
 QString CCryEditDoc::GetLastLoadedLevelName()
 {

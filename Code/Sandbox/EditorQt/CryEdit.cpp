@@ -2121,6 +2121,43 @@ CCryEditDoc* CCryEditApp::LoadLevel(const char* lpszFileName)//this path is a pa
 	return doc;
 }
 
+
+
+//////////////////////////////////////////////////////////////////////////
+CCryEditDoc* CCryEditApp::LoadLevelCE2(const char* lpszFileName)//this path is a pak file path but make this more robust
+{
+	CCryEditDoc* doc = 0;
+	if (GetIEditorImpl()->GetLevelIndependentFileMan()->PromptChangedFiles() && GetIEditorImpl()->GetDocument()->CanClose())
+	{
+		CProgressNotification notification("Loading Level", QString(lpszFileName));
+		// disable commands while loading. Since we process events this can trigger actions
+		// that tweak incomplete object state.
+		GetIEditorImpl()->EnableAcceleratos(false);
+
+		string newPath = PathUtil::AbsolutePathToCryPakPath(lpszFileName);
+		PathUtil::ToUnixPath(newPath.GetBuffer());
+
+		doc = GetIEditorImpl()->GetDocument();
+		if (doc)
+		{
+			delete doc;
+		}
+		doc = new CCryEditDoc;
+		doc->OnOpenDocumentCE2(newPath);
+		LoadTagLocations();
+
+		// Reenable accelerators here
+		GetIEditorImpl()->EnableAcceleratos(true);
+
+		doc->SetLastLoadedLevelName(newPath);
+	}
+
+	return doc;
+}
+
+
+
+
 //////////////////////////////////////////////////////////////////////////
 void CCryEditApp::OnResourcesReduceworkingset()
 {
