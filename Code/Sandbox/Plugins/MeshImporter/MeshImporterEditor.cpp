@@ -121,6 +121,7 @@ CEditorAdapter::CEditorAdapter(std::unique_ptr<MeshImporter::CBaseDialog> pDialo
 	AddToMenu(CEditor::MenuItems::FileMenu);
 
 	AddToMenu(CEditor::MenuItems::Open);
+	AddToMenu(CEditor::MenuItems::OpenCE2);
 	AddToMenu(CEditor::MenuItems::Save);
 	AddToMenu(CEditor::MenuItems::SaveAs);
 	AddToMenu("File", "meshimporter.import");

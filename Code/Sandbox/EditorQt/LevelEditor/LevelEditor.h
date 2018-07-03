@@ -57,6 +57,7 @@ private:
 
 	virtual bool OnNew() override;
 	virtual bool OnOpen() override;
+	virtual bool OnOpenCE2() override;
 	virtual bool OnSave() override;
 	virtual bool OnSaveAs() override;
 	virtual bool OnDelete() override;

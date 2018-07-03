@@ -84,6 +84,7 @@ protected:
 	//File menu methods
 	virtual bool OnNew()                         { return false; }
 	virtual bool OnOpen()                        { return false; }
+	virtual bool OnOpenCE2()					 { return false; }
 	virtual bool OnOpenFile(const QString& path) { CRY_ASSERT(0); return false; }
 	virtual bool OnClose()                       { return false; }
 	virtual bool OnSave()                        { return false; }
@@ -121,6 +122,7 @@ protected:
 		//File menu contents
 		New,
 		Open,
+		OpenCE2,
 		Close,
 		Save,
 		SaveAs,

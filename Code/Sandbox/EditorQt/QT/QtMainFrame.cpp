@@ -140,6 +140,7 @@ class Ui_MainWindow
 public:
 	QAction*  actionNew;
 	QAction*  actionOpen;
+	QAction*  actionOpenCE2;
 	QAction*  actionSave_As;
 	QAction*  actionToggle_Content_Browser;
 	QAction*  actionExport_to_Engine;
@@ -330,6 +331,13 @@ public:
 		CryIcon icon;
 		icon.addFile(QStringLiteral("icons:General/Folder_Open.ico"), QSize(), CryIcon::Normal, CryIcon::Off);
 		actionOpen->setIcon(icon);
+
+		actionOpenCE2 = new QCommandAction(nullptr, nullptr, MainWindow);
+		actionOpenCE2->setObjectName(QStringLiteral("actionOpenCE2"));
+		//CryIcon icon;
+		//icon.addFile(QStringLiteral("icons:General/Folder_Open.ico"), QSize(), CryIcon::Normal, CryIcon::Off);
+		actionOpenCE2->setIcon(icon);
+
 		actionSave_As = new QCommandAction(nullptr, nullptr, MainWindow);
 		actionSave_As->setObjectName(QStringLiteral("actionSave_As"));
 		actionSave_As->setIcon(CryIcon("icons:General/Save_as.ico"));
@@ -873,6 +881,7 @@ public:
 		menubar->addAction(menuHelp->menuAction());
 		menuFile->addAction(actionNew);
 		menuFile->addAction(actionOpen);
+		menuFile->addAction(actionOpenCE2);
 		menuFile->addAction(actionSave);
 		menuFile->addAction(actionSave_As);
 		menuFile->addSeparator();
@@ -1126,6 +1135,11 @@ public:
 		actionOpen->setText(QApplication::translate("MainWindow", "&Open...", 0));
 		actionOpen->setProperty("standardkey", QVariant(QApplication::translate("MainWindow", "Open", 0)));
 		actionOpen->setProperty("command", QVariant(QApplication::translate("MainWindow", "general.open", 0)));
+
+		actionOpenCE2->setText(QApplication::translate("MainWindow", "&OpenCE2...", 0));
+		actionOpenCE2->setProperty("standardkey", QVariant(QApplication::translate("MainWindow", "OpenCE2", 0)));
+		actionOpenCE2->setProperty("command", QVariant(QApplication::translate("MainWindow", "general.opence2", 0)));
+
 		actionSave_As->setText(QApplication::translate("MainWindow", "Save As...", 0));
 		actionSave_As->setProperty("standardkey", QVariant(QApplication::translate("MainWindow", "SaveAs", 0)));
 		actionSave_As->setProperty("command", QVariant(QApplication::translate("MainWindow", "general.save_as", 0)));

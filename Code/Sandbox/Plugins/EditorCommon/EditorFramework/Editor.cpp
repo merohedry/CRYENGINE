@@ -142,10 +142,11 @@ void CEditor::InitMenuDesc()
 		MenuDesc::AddMenu ( MenuItems::FileMenu, 0, 0, "File",
 			AddAction(MenuItems::New,    0, 0, GetAction("general.new")),
 			AddAction(MenuItems::Open,   0, 1, GetAction("general.open")),
-			AddAction(MenuItems::Close,  0, 2, GetAction("general.close")),
-			AddAction(MenuItems::Save,   0, 3, GetAction("general.save")),
-			AddAction(MenuItems::SaveAs, 0, 4, GetAction("general.save_as")),
-			AddMenu(MenuItems::RecentFiles, 0, 5, "Recent Files")
+			AddAction(MenuItems::OpenCE2, 0, 2, GetAction("general.opence2")),
+			AddAction(MenuItems::Close,  0, 3, GetAction("general.close")),
+			AddAction(MenuItems::Save,   0, 4, GetAction("general.save")),
+			AddAction(MenuItems::SaveAs, 0, 5, GetAction("general.save_as")),
+			AddMenu(MenuItems::RecentFiles, 0, 6, "Recent Files")
 		),
 		MenuDesc::AddMenu ( MenuItems::EditMenu, 0, 1, "Edit",
 			AddAction ( MenuItems::Undo, 0, 0, GetAction("general.undo") ),
@@ -444,6 +445,8 @@ void CEditor::customEvent(QEvent* event)
 			event->setAccepted(OnSaveAs());
 		else if (command == "general.open")
 			event->setAccepted(OnOpen());
+		else if (command == "general.opence2")
+			event->setAccepted(OnOpenCE2());
 		else if (command == "general.close")
 			event->setAccepted(OnClose());
 		else if (command == "general.copy")

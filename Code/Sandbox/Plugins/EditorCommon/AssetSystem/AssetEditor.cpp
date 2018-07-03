@@ -199,6 +199,7 @@ void CAssetEditor::InitGenericMenu()
 	AddToMenu(CEditor::MenuItems::FileMenu);
 
 	AddToMenu(CEditor::MenuItems::Open);
+	AddToMenu(CEditor::MenuItems::OpenCE2);
 	AddToMenu(CEditor::MenuItems::Close);
 	AddToMenu(CEditor::MenuItems::Save);
 	AddToMenu(CEditor::MenuItems::RecentFiles);

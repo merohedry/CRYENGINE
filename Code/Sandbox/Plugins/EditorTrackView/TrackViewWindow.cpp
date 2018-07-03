@@ -152,7 +152,7 @@ void CTrackViewWindow::InitMenu()
 	const CEditor::MenuItems items[] = {
 		CEditor::MenuItems::FileMenu,
 		CEditor::MenuItems::EditMenu,CEditor::MenuItems::ViewMenu,  CEditor::MenuItems::New,
-		CEditor::MenuItems::Open,    CEditor::MenuItems::Close,     CEditor::MenuItems::Undo,
+		CEditor::MenuItems::Open,    CEditor::MenuItems::OpenCE2, CEditor::MenuItems::Close,     CEditor::MenuItems::Undo,
 		CEditor::MenuItems::Redo,    CEditor::MenuItems::Copy,      CEditor::MenuItems::Cut,
 		CEditor::MenuItems::Paste,   CEditor::MenuItems::Delete,    CEditor::MenuItems::Duplicate
 	};

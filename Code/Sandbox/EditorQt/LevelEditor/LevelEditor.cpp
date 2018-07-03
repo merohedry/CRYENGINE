@@ -700,6 +700,37 @@ bool CLevelEditor::OnOpen()
 	return true;
 }
 
+
+bool CLevelEditor::OnOpenCE2()
+{
+	bool isProceed = GetIEditorImpl()->GetDocument()->CanClose();
+	if (!isProceed)
+	{
+		return true;
+	}
+	// We need to ensure that the level path exists before calling the dialog, else the filesystem model will be initialized
+	// with an invalid path
+	if (!LevelFileUtils::EnsureLevelPathsValid())
+	{
+		return true;
+	}
+	COpenLevelDialog levelOpenDialog;
+	QString lastLoadedLevelName(GetIEditorImpl()->GetDocument()->GetLastLoadedLevelName());
+	if (!lastLoadedLevelName.isEmpty())
+	{
+		levelOpenDialog.SelectLevelFile(lastLoadedLevelName);
+	}
+	if (levelOpenDialog.exec() == QDialog::Accepted)
+	{
+		auto filename = levelOpenDialog.GetAcceptedLevelFile().toStdString();//will be relative to working directory/project root
+		CCryEditApp::GetInstance()->DiscardLevelChanges();
+		CCryEditApp::GetInstance()->LoadLevel(filename.c_str());
+	}
+	return true;
+}
+
+
+
 bool CLevelEditor::OnSave()
 {
 	string level = GetIEditorImpl()->GetDocument()->GetPathName();

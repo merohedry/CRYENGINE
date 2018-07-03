@@ -25,6 +25,12 @@ void PyOpen()
 	CommandEvent("general.open").SendToKeyboardFocus();
 }
 
+
+void PyOpenCE2()
+{
+	CommandEvent("general.opence2").SendToKeyboardFocus();
+}
+
 void PySave()
 {
 	CommandEvent("general.save").SendToKeyboardFocus();
@@ -143,6 +149,12 @@ REGISTER_PYTHON_COMMAND_WITH_EXAMPLE(Private_EditorCommands::PyOpen, general, op
                                      "Open...",
                                      "general.open()");
 REGISTER_EDITOR_COMMAND_SHORTCUT(general, open, CKeyboardShortcut::StandardKey::Open);
+
+
+REGISTER_PYTHON_COMMAND_WITH_EXAMPLE(Private_EditorCommands::PyOpenCE2, general, opence2,
+	"OpenCE2...",
+	"general.opence2()");
+
 
 REGISTER_PYTHON_COMMAND_WITH_EXAMPLE(Private_EditorCommands::PyClose, general, close,
                                      "Close",
